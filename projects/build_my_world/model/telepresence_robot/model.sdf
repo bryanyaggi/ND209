@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
-  <model name='telepresence_robot_complete'>
+  <model name='telepresence_robot'>
     <link name='link_4'>
       <pose frame=''>0 0 -0.15625 1.5707 -0 0</pose>
       <inertial>

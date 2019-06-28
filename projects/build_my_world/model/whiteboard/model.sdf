@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
-  <model name='whiteboardV2'>
+  <model name='whiteboard'>
     <link name='link_0'>
       <pose frame=''>0 0 1.09583 0 -0 0</pose>
       <inertial>
