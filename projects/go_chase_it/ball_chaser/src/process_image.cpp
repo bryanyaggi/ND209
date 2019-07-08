@@ -3,9 +3,14 @@
 #include <sensor_msgs/Image.h>
 #include <string>
 
+/**
+ * State enumeration for robot driving states
+ */
+enum State {STOPPED, TURNING_LEFT, TURNING_RIGHT, DRIVING_STRAIGHT};
+
 ros::ServiceClient client;
 
-void drive_robot(float linear_x, float angular_z)
+bool drive_robot(float linear_x, float angular_z)
 {
   ball_chaser::DriveToTarget srv;
   srv.request.linear_x = linear_x;
@@ -14,12 +19,15 @@ void drive_robot(float linear_x, float angular_z)
   if (!client.call(srv))
   {
     ROS_ERROR("Failed to call service drive_bot");
+    return false;
   }
+  return true;
 }
 
 void process_image_callback(const sensor_msgs::Image image)
 {
-  uint8_t target_pixel_rgb_vals[] = {255, 255, 255};
+  static State state = STOPPED;
+  uint8_t target_pixel_rgb_vals[] = {255, 255, 255}; // RGB values of white pixel
 
   int num_target_pixels = 0;
   float avg_target_pixel_column = 0.0;
@@ -46,27 +54,58 @@ void process_image_callback(const sensor_msgs::Image image)
     }
   }
 
+  // Determine next state
+  State next_state;
   if (num_target_pixels == 0)
   {
-    drive_robot(0.0, 0.0); // stop
+    next_state = STOPPED;
   }
   else
   {
     avg_target_pixel_column /= num_target_pixels;
     if (avg_target_pixel_column < (float) image.width / 3)
     {
-      drive_robot(0.0, 0.5); // turn left
+      next_state = TURNING_LEFT;
     }
     else if (avg_target_pixel_column > (float) image.width * 2 / 3)
     {
-      drive_robot(0.0, -0.5); // turn right
+      next_state = TURNING_RIGHT;
     }
     else
     {
-      drive_robot(0.5, 0.0); // drive straight
+      next_state = DRIVING_STRAIGHT;
     }
   }
-  ROS_INFO_STREAM("num target pixels = " + std::to_string(num_target_pixels) + " avg column = " + std::to_string(avg_target_pixel_column));
+
+  // Command robot if necessary
+  if (next_state != state)
+  {
+    float linear_x, angular_z;
+    switch (next_state)
+    {
+      case STOPPED:
+        linear_x = 0.0;
+        angular_z = 0.0;
+        break;
+      case TURNING_LEFT:
+        linear_x = 0.0;
+        angular_z = 0.5;
+        break;
+      case TURNING_RIGHT:
+        linear_x = 0.0;
+        angular_z = -0.5;
+        break;
+      case DRIVING_STRAIGHT:
+        linear_x = 0.5;
+        angular_z = 0.0;
+        break;
+    }
+
+    if (drive_robot(linear_x, angular_z))
+    {
+      state = next_state;
+    }
+  }
 }
 
 int main(int argc, char** argv)

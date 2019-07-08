@@ -96,5 +96,18 @@
     </sensor>
   </gazebo>
 
+  <!--Add colors for Gazebo-->
+  <gazebo reference="left_wheel">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="right_wheel">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="chassis">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+  <gazebo reference="camera">
+    <material>Gazebo/Black</material>
+  </gazebo>
 
 </robot>
