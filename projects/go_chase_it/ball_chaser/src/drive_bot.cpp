@@ -15,7 +15,7 @@ bool handle_drive_request(ball_chaser::DriveToTarget::Request &request,
 
   response.msg_feedback = "Commanded robot: linear x = " + std::to_string(request.linear_x)
     + " , angular z = " + std::to_string(request.angular_z);
-  ROS_INFO_STREAM(response.msg_feedback);
+  //ROS_INFO_STREAM(response.msg_feedback);
 
   return true;
 }
