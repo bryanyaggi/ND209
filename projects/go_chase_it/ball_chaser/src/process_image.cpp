@@ -1,7 +1,6 @@
 #include "ros/ros.h"
 #include "ball_chaser/DriveToTarget.h"
 #include <sensor_msgs/Image.h>
-#include <string>
 
 /**
  * State enumeration for robot driving states
