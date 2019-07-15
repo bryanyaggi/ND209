@@ -1,0 +1,66 @@
+\documentclass[10pt]{article}
+\usepackage{fullpage,enumitem,amsmath,amssymb,graphicx,listings,tikz,bbm,xcolor}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\section*{\normalsize EKF Example 1}
+
+State variable represents location in cartesian coordinates.
+$$x = \begin{bmatrix}
+x\\
+y
+\end{bmatrix}$$
+
+Measurements are taken in polar coordinates.
+$$z = \begin{bmatrix}
+r\\
+\theta
+\end{bmatrix}$$
+
+Measurement function maps the state to the measurements.
+$$h(x) = \begin{bmatrix}
+\sqrt{x^2 + y^2}\\
+\tan^{-1}{\frac{y}{x}}
+\end{bmatrix}$$
+
+Residual equation:
+$$y = z - h(x)$$
+
+Jacobian/linearization of measurement function:
+\begin{align*}
+	H &= \begin{bmatrix}
+	\frac{\partial r}{\partial x} & \frac{\partial r}{\partial y}\\
+	\frac{\partial \theta}{\partial x} & \frac{\partial \theta}{\partial y}
+	\end{bmatrix}\\
+	&= \begin{bmatrix}
+	\frac{x}{\sqrt{x^2 + y^2}} & \frac{y}{\sqrt{x^2 + y^2}}\\
+	-\frac{y}{x^2 + y^2} & \frac{x}{x^2 + y^2}
+	\end{bmatrix}
+\end{align*}
+
+\section*{\normalsize EKF Example 2: Quadrotor}
+
+State variable represents roll angle, y velocity, and y position of a quadrotor.
+$$x = \begin{bmatrix}
+\phi\\
+\dot{y}\\
+y
+\end{bmatrix}$$
+
+Measurements to wall are taken using a range finder. Measurement function for the range finder:
+$$h(x) = \begin{bmatrix}
+\frac{wall - y}{cos \phi}
+\end{bmatrix}$$
+
+Jacobian/linearization of measurement function:
+\begin{align*}
+	H &= \begin{bmatrix}
+	\frac{\partial h}{\partial \phi} & \frac{\partial h}{\partial \dot{y}} & \frac{\partial h}{\partial y}
+	\end{bmatrix}\\
+	&= \begin{bmatrix}
+	\frac{sin \phi}{cos^2 \phi}(wall - y) & 0 & -\frac{1}{cos \phi}
+	\end{bmatrix}
+\end{align*}
+
+\end{document}

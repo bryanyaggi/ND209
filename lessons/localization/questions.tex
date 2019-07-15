@@ -1,0 +1,74 @@
+\documentclass[10pt]{article}
+\usepackage{fullpage,enumitem,amsmath,amssymb,graphicx,listings,tikz,bbm,xcolor}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\section*{\normalsize Multivariate Gaussians}
+
+\begin{enumerate}
+	\item You are tracking the position and velocity of a robot in two dimensions, $x$ and $y$. The state is represented as so,
+	$$x = \begin{bmatrix}
+	p_x\\
+	p_y\\
+	v_x\\
+	v_y
+	\end{bmatrix}$$
+	
+	Find the state update function, $F$, that will advance the state from time $t$ to time $t + 1$ based on the state transition equation below.
+	$$x' = Fx$$
+	
+	$$F = \begin{bmatrix}
+	1 & 0 & \Delta t & 0\\
+	0 & 1 & 0 & \Delta t\\
+	0 & 0 & 1 & 0\\
+	0 & 0 & 0 & 1
+	\end{bmatrix}$$
+	
+	\item You are tracking the position, velocity, and acceleration of a quadrotor in the vertical dimension, $z$. The state of the quadrotor can be represented as so,
+	$$x = \begin{bmatrix}
+	z\\
+	\dot z\\
+	\ddot z
+	\end{bmatrix}$$
+	
+	Find the state update function, $F$, that will advance the state from time $t$ to time $t + 1$ based on the state transition equation below.
+	$$x' = Fx$$
+	
+	$$F = \begin{bmatrix}
+	1 & \Delta t & \frac{1}{2} (\Delta t)^2\\
+	0 & 1 & \Delta t\\
+	0 & 0 & 1
+	\end{bmatrix}$$
+\end{enumerate}
+
+\section*{\normalsize EKF Example}
+
+\begin{enumerate}
+	\item State variable represents roll angle, y velocity, and y position of a quadrotor.
+	$$x = \begin{bmatrix}
+	\phi\\
+	\dot{y}\\
+	y
+	\end{bmatrix}$$
+	
+	Assuming no roll, what is the measurement function of the range finder?
+	$$h(x) = wall - y$$
+	
+	\item More generally, what is the measurement function for the range finder:
+	$$h(x) = \begin{bmatrix}
+	\frac{wall - y}{cos \phi}
+	\end{bmatrix}$$
+	
+	\item What is the Jacobian/linearization of the measurement function?
+	\begin{align*}
+		H &= \begin{bmatrix}
+		\frac{\partial h}{\partial \phi} & \frac{\partial h}{\partial \dot{y}} & \frac{\partial h}{\partial y}
+		\end{bmatrix}\\
+		&= \begin{bmatrix}
+		\frac{sin \phi}{cos^2 \phi}(wall - y) & 0 & -\frac{1}{cos \phi}
+		\end{bmatrix}
+	\end{align*}
+\end{enumerate}
+
+\end{document}
