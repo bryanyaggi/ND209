@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8.3)
-project (localization)
+project (kalman_filters)
 add_executable(gaussian_1d gaussian_1d.cpp)
 add_executable(measurement_update measurement_update.cpp)
 add_executable(state_prediction state_prediction.cpp)
