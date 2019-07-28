@@ -221,7 +221,7 @@ void visualization(int n, Robot robot, int step, Robot p[], Robot pr[])
   plt::plot({ robot.x }, { robot.y }, "bo");
 
 	//Save the image and close the plot
-  plt::save("./Images/Step" + to_string(step) + ".png");
+  plt::save("../Images/Step" + to_string(step) + ".png");
   plt::clf();
 }
 
