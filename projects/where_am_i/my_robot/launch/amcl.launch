@@ -7,9 +7,8 @@
 
   <!-- AMCL Node -->
   <node name="amcl" pkg="amcl" type="amcl" output="screen">
-    <!--
-    <remap from="scan" to="my_robot/laser/scan"/>
-    -->
+    <!-- <remap from="scan" to="my_robot/laser/scan"/> -->
+
     <param name="odom_frame_id" value="odom"/>
     <param name="odom_model_type" value="diff-corrected"/>
     <param name="base_frame_id" value="robot_footprint"/>
@@ -18,14 +17,20 @@
     <param name="initial_pose_x" value="0"/>
     <param name="initial_pose_y" value="0"/>
 
-    <param name="transform_tolerance" value="0.2"/>
+    <param name="min_particles" value="100"/>
+    <param name="max_particles" value="2500"/>
+    <param name="update_min_d" value="0.0254"/>
+    <param name="update_min_a" value="pi/90.0"/>
+    
+    <param name="laser_min_range" value="-1.0"/>
+    <param name="laser_max_range" value="-1.0"/>
+    <param name="laser_max_beams" value="30"/>
   </node>
 
   <!-- Move Base -->
   <node name="move_base" pkg="move_base" type="move_base" respawn="false" output="screen">
-    <!--
-    <remap from="scan" to="my_robot/laser/scan"/>
-    -->
+    <!-- <remap from="scan" to="my_robot/laser/scan"/> -->
+
     <param name="base_global_planner" value="navfn/NavfnROS"/>
     <param name="base_local_planner" value="base_local_planner/TrajectoryPlannerROS"/>
 
