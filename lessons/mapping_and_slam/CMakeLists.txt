@@ -7,6 +7,7 @@ set(PYTHON_INCLUDE /usr/include/python2.7)
 include_directories(${PYTHON_INCLUDE})
 
 add_executable(occupancy_grid_mapping occupancy_grid_mapping.cpp)
+add_executable(sensor_fusion sensor_fusion.cpp)
 
 add_compile_options(-std=c++11)
 
