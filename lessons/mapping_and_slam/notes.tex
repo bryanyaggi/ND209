@@ -1,0 +1,71 @@
+\documentclass[10pt]{article}
+\usepackage{fullpage,enumitem,amsmath,amssymb,graphicx,listings,tikz,bbm,xcolor}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+{\Large \textbf{GraphSLAM}}
+
+\section*{\normalsize Maximum Likelihood Estimation}
+
+$x_0$ is the robot's initial position
+
+$z_1$ is the robot's distance from a landmark $m_1$
+
+Gaussian probablility density function of location given a single measurement of 1.8 m:
+$$p(z_1) = \frac{1}{\sigma \sqrt{2 \pi}} \exp \left( -\frac{1}{2} \frac{(z_1 - (x_0 + 1.8))^2}{\sigma^2} \right)$$
+
+Since $x_0 = 0$:
+$$p(z_1) = \frac{1}{\sigma \sqrt{2 \pi}} \exp \left( -\frac{1}{2} \frac{(z_1 - 1.8)^2}{\sigma^2} \right)$$
+
+Adding another measurement of 2.2 m:
+$$p(z_1) = \frac{1}{\sigma \sqrt{2 \pi}} \exp \left( -\frac{1}{2} \frac{(z_1 - 1.8)^2}{\sigma^2} \right) * \frac{1}{\sigma \sqrt{2 \pi}} \exp \left( -\frac{1}{2} \frac{(z_1 - 2.2)^2}{\sigma^2} \right)$$
+
+Remove scaling factors:
+$$= \exp \left( -\frac{1}{2} \frac{(z_1 - 1.8)^2}{\sigma^2} \right) * \exp \left( -\frac{1}{2} \frac{(z_1 - 2.2)^2}{\sigma^2} \right)$$
+
+Simplify:
+$$= \exp \left( -\frac{1}{2} \frac{(z_1 - 1.8)^2}{\sigma^2} - \frac{1}{2} \frac{(z_1 - 2.2)^2}{\sigma^2} \right)$$
+
+Take natural log; log-likelihood:
+$$= -\frac{1}{2} \frac{(z_1 - 1.8)^2}{\sigma^2} - \frac{1}{2} \frac{(z_1 - 2.2)^2}{\sigma^2}$$
+Note that the funtion now returns a negative value for the probability, which is between 0 and 1.
+
+Remove scaling factors:
+$$= (z_1 - 1.8)^2 + (z_1 - 2.2)^2$$
+
+Simplify:
+$$= 2z_1^2 - 8z_1 + 8.08$$
+
+Find the value that minimizes the function:
+$$\frac{\partial}{\partial z_1} (2z_1^2 - 8z_1 + 8.08) = 4z_1 - 8 = 0 \therefore z_1 = 2$$
+
+\section*{\normalsize MLE Example}
+The robot starts at $x_0 = 0$. It takes a measurement to landmark $z_1$ of 7 m. It then moves 10 m. In its new location, it measures 4 m to landmark $z_1$. The resulting sum of constraints:
+\begin{align*}
+J_{graphSLAM} &= \frac{(z_1 - (x_0 + 7))^2}{\sigma^2} + \frac{(z_1 - (x_1 - 4))^2}{\sigma^2} + \frac{(x_1 - (x_0 + 10))^2}{\sigma^2}\\
+&= \frac{(z_1 - 7)^2}{\sigma^2} + \frac{(z_1 - (x_1 - 4))^2}{\sigma^2} + \frac{(x_1 - 10)^2}{\sigma^2}
+\end{align*}
+
+Find values that optimize the function:
+\begin{align*}
+\frac{\partial}{\partial x_1} J_{graphSLAM} = \frac{2}{\sigma^2} (z_1 - x_1 + 4)(-1) + \frac{2}{\sigma^2} (x_1 - 10) &= 0\\
+2x_1 - z_1 - 14 &= 0\\
+\frac{\partial}{\partial z_1} J_{graphSLAM} = \frac{2}{\sigma^2} (z_1 - 7) + \frac{2}{\sigma^2} (z_1 - (x_1 - 4)) &= 0\\
+2z_1 - x_1 - 3 &= 0\\
+x_1 &= \frac{31}{3} = 10.33\\
+z_1 &= \frac{20}{3} = 6.67\\
+\end{align*}
+
+Now, the motion variance is 0.02 and the measurement variance is 0.1.
+\begin{align*}
+\frac{\partial}{\partial x_1} J_{graphSLAM} = \frac{2}{0.1} (z_1 - x_1 + 4)(-1) + \frac{2}{0.02} (x_1 - 10) &= 0\\
+60x_1 - 10z_1 - 540 &= 0\\
+6x_1 - z_1 - 54 &= 0\\
+\frac{\partial}{\partial z_1} J_{graphSLAM} = \frac{2}{(0.1)^2} (z_1 - 7) + \frac{2}{(0.1)^2} (z_1 - (x_1 - 4)) &= 0\\
+2z_1 - x_1 - 3 &= 0\\
+x_1 &= 10.09\\
+z_1 &= 6.55\\
+\end{align*}
+
+\end{document}
