@@ -76,7 +76,7 @@ void printInfo(Map map, Planner planner)
   print2DVector(planner.movements);
 }
 
-void search(Map map, Planner planner)
+void bfs(Map map, Planner planner)
 {
   // explored 2D vector
   vector<vector<int>> explored(map.mapHeight, vector<int>(map.mapWidth));
@@ -168,12 +168,120 @@ void search(Map map, Planner planner)
   print2DVector(policy);
 }
 
+void aStar(Map map, Planner planner)
+{
+  // heuristic 2D vector
+  vector<vector<int>> heuristic(map.mapHeight, vector<int>(map.mapWidth));
+  for (int row = 0; row < map.mapHeight; row++)
+  {
+    for (int col = 0; col < map.mapWidth; col++)
+    {
+      // Manhattan distance
+      heuristic[row][col] = abs(planner.goal[0] - row)
+        + abs(planner.goal[1] - col);
+    }
+  }
+
+  // explored 2D vector
+  vector<vector<int>> explored(map.mapHeight, vector<int>(map.mapWidth));
+  explored[planner.start[0]][planner.start[1]] = 1;
+
+  // frontier data for starting location
+  int x = planner.start[0];
+  int y = planner.start[1];
+  int g = 0;
+  int f = g + heuristic[x][y];
+  int expandCount = 0;
+
+  // frontier queue
+  deque<vector<int>> frontier;
+  frontier.push_back(vector<int> {f, g, x, y});
+
+  // expansion 2D vector
+  vector<vector<int>> expansion(map.mapHeight, vector<int>(map.mapWidth, -1));
+
+  // action 2D vector
+  vector<vector<int>> action(map.mapHeight, vector<int>(map.mapWidth, -1));
+  
+  bool done = false;
+
+  while (!done)
+  {
+    if (frontier.size() == 0)
+    {
+      done = true;
+      cout << "Failed to reach goal." << endl;
+    }
+    else
+    {
+      // Pop next frontier location
+      sort(frontier.begin(), frontier.end());
+      vector<int> location = frontier.front();
+      frontier.pop_front();
+      x = location[2];
+      y = location[3];
+      g = location[1];
+      f = location[0];
+      expansion[x][y] = expandCount;
+      expandCount++;
+
+      // Check if goal reached
+      if (x == planner.goal[0] && y == planner.goal[1])
+      {
+        done = true;
+        cout << "[" << f << ", " << g << ", " << x << ", " << y << "]" << endl;
+      }
+      // Add locations to frontier
+      else
+      {
+        for (int i = 0; i < planner.movements.size(); i++)
+        {
+          int x_new = x + planner.movements[i][0];
+          int y_new = y + planner.movements[i][1];
+          if (x_new >= 0 && x_new < map.mapHeight
+              && y_new >= 0 && y_new < map.mapWidth)
+          {
+            if (explored[x_new][y_new] == 0 && map.grid[x_new][y_new] == 0)
+            {
+              int g_new = g + planner.cost;
+              int f_new = g_new + heuristic[x_new][y_new];
+              frontier.push_back(vector<int> {f_new, g_new, x_new, y_new});
+              explored[x_new][y_new] = 1;
+              action[x_new][y_new] = i;
+            }
+          }
+        }
+      }
+    }
+  }
+  cout << "Expansion:" << endl;
+  print2DVector(expansion);
+
+  // policy 2D vector
+  vector<vector<string>> policy(map.mapHeight, vector<string>(map.mapWidth, "-"));
+  if (x == planner.goal[0] && y == planner.goal[1])
+  {
+    policy[x][y] = "*";
+  }
+
+  while (!(x == planner.start[0] && y == planner.start[1]))
+  {
+    int x_prev = x - planner.movements[action[x][y]][0];
+    int y_prev = y - planner.movements[action[x][y]][1];
+    policy[x_prev][y_prev] = planner.movements_arrows[action[x][y]];
+    x = x_prev;
+    y = y_prev;
+  }
+  cout << "Policy:" << endl;
+  print2DVector(policy);
+}
+
 int main()
 {
   Map map;
   Planner planner;
 
-  search(map, planner);
+  aStar(map, planner);
 
   return 0;
 }
