@@ -4,13 +4,16 @@
 #include <vector>
 #include <algorithm>
 #include <deque>
+#include <fstream>
+#include "matplotlibcpp.h"
 
 using namespace std;
+namespace plt = matplotlibcpp;
 
 class Map
 {
   public:
-
+    /*
     const static int mapWidth = 6;
     const static int mapHeight = 5;
     vector<vector<int>> grid = {
@@ -20,14 +23,59 @@ class Map
       {0, 1, 0, 0, 0, 0},
       {0, 0, 0, 1, 1, 0}
     };
+    */
+    const static int mapHeight = 300;
+    const static int mapWidth = 150;
+    vector<vector<double>> map = getMap();
+    vector<vector<int>> grid = mapToGrid();
+
+  private:
+
+    vector<vector<double>> getMap()
+    {
+      vector<vector<double>> map(mapHeight, vector<double>(mapWidth));
+      ifstream mapFile;
+      mapFile.open("../map.txt");
+
+      while (!mapFile.eof())
+      {
+        for (int i = 0; i < mapHeight; i++)
+        {
+          for (int j = 0; j < mapWidth; j++)
+          {
+            mapFile >> map[i][j];
+          }
+        }
+      }
+      return map;
+    }
+
+    vector<vector<int>> mapToGrid()
+    {
+      vector<vector<int>> grid(mapHeight, vector<int>(mapWidth));
+      for (int i = 0; i < mapHeight; i++)
+      {
+        for (int j = 0; j < mapWidth; j++)
+        {
+          if (map[i][j] >= 0) // unknown or occupied space
+          {
+            grid[i][j] = 1; // obstacle
+          }
+        }
+      }
+      return grid;
+    }
 };
 
 class Planner : Map
 {
   public:
-
+    /*
     int start[2] = {0, 0};
     int goal[2] = {mapHeight - 1, mapWidth - 1};
+    */
+    int start[2] = {230, 145};
+    int goal[2] = {60, 50};
     int cost = 1;
     string movements_arrows[4] = {"^", "<", "v", ">"};
     vector<vector<int>> movements = {
@@ -36,6 +84,24 @@ class Planner : Map
       {1, 0},
       {0, 1}
     };
+    vector<vector<int>> heuristic = generateHeuristic();
+    vector<vector<int>> path;
+
+  private:
+
+    vector<vector<int>> generateHeuristic()
+    {
+      vector<vector<int>> heuristic(mapHeight, vector<int>(mapWidth));
+      for (int i = 0; i < mapHeight; i++)
+      {
+        for (int j = 0; j < mapWidth; j++)
+        {
+          // Manhattan distance
+          heuristic[i][j] = abs(goal[0] - i) + abs(goal[1] - j);
+        }
+      }
+      return heuristic;
+    }
 };
 
 template <typename T>
@@ -76,7 +142,48 @@ void printInfo(Map map, Planner planner)
   print2DVector(planner.movements);
 }
 
-void bfs(Map map, Planner planner)
+void visualization(Map map, Planner planner)
+{
+  plt::title("Path");
+  plt::xlim(0, map.mapHeight);
+  plt::ylim(0, map.mapWidth);
+
+  // Plot each grid
+  for (double x = 0; x < map.mapHeight; x++)
+  {
+    cout << "Remaining rows: " << map.mapHeight - x << endl;
+    for (double y = 0; y < map.mapWidth; y++)
+    {
+      if (map.map[x][y] == 0) // unknown
+      {
+        plt::plot({x}, {y}, "g."); // green
+      }
+      else if (map.map[x][y] > 0) // occupied
+      {
+        plt::plot({x}, {y}, "k."); // black
+      }
+      else // free
+      {
+        plt::plot({x}, {y}, "r."); // red
+      }
+    }
+  }
+
+  // Plot start and goal locations
+  plt::plot({(double) planner.start[0]}, {(double) planner.start[1]}, "bo");
+  plt::plot({(double) planner.goal[0]}, {(double) planner.goal[1]}, "b*");
+
+  // Plot path
+  for (int i = 0; i < planner.path.size(); i++)
+  {
+    plt::plot({(double) planner.path[i][0]}, {(double) planner.path[i][1]}, "b.");
+  }
+
+  plt::save("../Images/Path.png");
+  plt::clf();
+}
+
+Planner bfs(Map map, Planner planner)
 {
   // explored 2D vector
   vector<vector<int>> explored(map.mapHeight, vector<int>(map.mapWidth));
@@ -156,32 +263,24 @@ void bfs(Map map, Planner planner)
     policy[x][y] = "*";
   }
 
+  planner.path.clear();
   while (!(x == planner.start[0] && y == planner.start[1]))
   {
     int x_prev = x - planner.movements[action[x][y]][0];
     int y_prev = y - planner.movements[action[x][y]][1];
+    planner.path.push_back(vector<int> {x_prev, y_prev});
     policy[x_prev][y_prev] = planner.movements_arrows[action[x][y]];
     x = x_prev;
     y = y_prev;
   }
   cout << "Policy:" << endl;
   print2DVector(policy);
+
+  return planner;
 }
 
-void aStar(Map map, Planner planner)
+Planner aStar(Map map, Planner planner)
 {
-  // heuristic 2D vector
-  vector<vector<int>> heuristic(map.mapHeight, vector<int>(map.mapWidth));
-  for (int row = 0; row < map.mapHeight; row++)
-  {
-    for (int col = 0; col < map.mapWidth; col++)
-    {
-      // Manhattan distance
-      heuristic[row][col] = abs(planner.goal[0] - row)
-        + abs(planner.goal[1] - col);
-    }
-  }
-
   // explored 2D vector
   vector<vector<int>> explored(map.mapHeight, vector<int>(map.mapWidth));
   explored[planner.start[0]][planner.start[1]] = 1;
@@ -190,7 +289,7 @@ void aStar(Map map, Planner planner)
   int x = planner.start[0];
   int y = planner.start[1];
   int g = 0;
-  int f = g + heuristic[x][y];
+  int f = g + planner.heuristic[x][y];
   int expandCount = 0;
 
   // frontier queue
@@ -244,7 +343,7 @@ void aStar(Map map, Planner planner)
             if (explored[x_new][y_new] == 0 && map.grid[x_new][y_new] == 0)
             {
               int g_new = g + planner.cost;
-              int f_new = g_new + heuristic[x_new][y_new];
+              int f_new = g_new + planner.heuristic[x_new][y_new];
               frontier.push_back(vector<int> {f_new, g_new, x_new, y_new});
               explored[x_new][y_new] = 1;
               action[x_new][y_new] = i;
@@ -264,16 +363,20 @@ void aStar(Map map, Planner planner)
     policy[x][y] = "*";
   }
 
+  planner.path.clear();
   while (!(x == planner.start[0] && y == planner.start[1]))
   {
     int x_prev = x - planner.movements[action[x][y]][0];
     int y_prev = y - planner.movements[action[x][y]][1];
+    planner.path.push_back(vector<int> {x_prev, y_prev});
     policy[x_prev][y_prev] = planner.movements_arrows[action[x][y]];
     x = x_prev;
     y = y_prev;
   }
   cout << "Policy:" << endl;
   print2DVector(policy);
+
+  return planner;
 }
 
 int main()
@@ -281,7 +384,9 @@ int main()
   Map map;
   Planner planner;
 
-  aStar(map, planner);
+  planner = aStar(map, planner);
+
+  visualization(map, planner);
 
   return 0;
 }
