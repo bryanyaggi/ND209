@@ -4,14 +4,14 @@
   <!--robot pose-->
   <arg name="x" default="0"/>
   <arg name="y" default="0"/>
-  <arg name="z" default="0"/>
+  <arg name="z" default=".5"/>
   <arg name="roll" default="0"/>
   <arg name="pitch" default="0"/>
   <arg name="yaw" default="0"/>
   <!--launch other revelant files-->
   <include file="$(find my_robot)/launch/robot_description.launch"/>
   <!--world-->
-  <arg name="world_file" default="$(find my_robot)/worlds/my_world_simple.world"/>
+  <arg name="world_file" default="$(find my_robot)/worlds/earthquake.world"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="use_sim_time" value="true"/>
     <arg name="debug" value="false"/>
