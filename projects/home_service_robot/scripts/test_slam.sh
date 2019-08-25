@@ -5,7 +5,7 @@ SOURCE_CATKINWS="source ~/catkin_ws/devel/setup.bash"
 
 # Deploy turtlebot in Gazebo
 xterm -e "$SOURCE_CATKINWS && roslaunch turtlebot_gazebo turtlebot_world.launch \
-  world_file:=$(rospack find my_robot)/worlds/my_world_simple.world" &
+  world_file:=$(dirname $(pwd))/worlds/home.world" &
 sleep 15
 
 # SLAM
