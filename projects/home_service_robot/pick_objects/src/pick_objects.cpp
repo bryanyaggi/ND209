@@ -1,6 +1,8 @@
 #include <ros/ros.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
+#include <tf/tf.h>
+#include <math.h>
 #include <string>
 #include <vector>
 
@@ -10,14 +12,14 @@ class Goal
     std::string name;
     double x;
     double y;
-    double w;
+    double yaw;
 
-    Goal(std::string nameVal, double xVal, double yVal, double wVal)
+    Goal(std::string nameVal, double xVal, double yVal, double yawVal)
     {
       name = nameVal;
       x = xVal;
       y = yVal;
-      w = wVal;
+      yaw = yawVal;
     }
 };
 
@@ -39,15 +41,15 @@ int main(int argc, char** argv)
   goal.target_pose.header.frame_id = "map";
 
   std::vector<Goal> goals;
-  goals.push_back(Goal("pick-up", 2.0, 2.0, 1.0));
-  goals.push_back(Goal("drop-off", -2.0, -2.0, 1.0));
+  goals.push_back(Goal("pick-up", 2.0, 2.0, M_PI/4));
+  goals.push_back(Goal("drop-off", -2.0, -2.0, 5*M_PI/4));
 
   for (auto& element : goals)
   {
     goal.target_pose.header.stamp = ros::Time::now();
     goal.target_pose.pose.position.x = element.x;
     goal.target_pose.pose.position.y = element.y;
-    goal.target_pose.pose.orientation.w = element.w;
+    goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(element.yaw);
     
     ROS_INFO("Sending %s location goal.", element.name.c_str());
     ac.sendGoal(goal);
