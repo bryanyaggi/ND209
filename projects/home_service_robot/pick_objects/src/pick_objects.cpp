@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "add_markers/AddMarker.h"
+
 class Goal
 {
   public:

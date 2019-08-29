@@ -1,0 +1,7 @@
+uint8 markerId
+float64 x
+float64 y
+float64 yaw
+bool action # 1 = add, 0 = delete
+---
+string response
