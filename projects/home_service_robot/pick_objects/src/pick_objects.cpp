@@ -8,20 +8,47 @@
 
 #include "add_markers/AddMarker.h"
 
+ros::ServiceClient client;
+
 class Goal
 {
   public:
     std::string name;
+    int id;
+    bool pickup;
     double x;
     double y;
     double yaw;
 
-    Goal(std::string nameVal, double xVal, double yVal, double yawVal)
+    Goal(std::string nameVal, int idVal, double xVal, double yVal,
+        double yawVal, bool pickupVal)
     {
       name = nameVal;
+      id = idVal;
       x = xVal;
       y = yVal;
       yaw = yawVal;
+      pickup = pickupVal;
+
+      if (pickup)
+      {
+        // Request marker to be added in RViz
+        add_markers::AddMarker srv;
+        srv.request.id = id;
+        srv.request.x = x;
+        srv.request.y = y;
+        srv.request.yaw = yaw;
+        srv.request.action = true;
+
+        if (client.call(srv))
+        {
+          ROS_INFO("Added pickup marker %d.", id);
+        }
+        else
+        {
+          ROS_INFO("Failed to add pickup marker %d.", id);
+        }
+      }
     }
 };
 
@@ -55,7 +82,9 @@ bool completeGoal(MoveBaseClient &ac, move_base_msgs::MoveBaseGoal &mbg, Goal go
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "pick_objects");
+  ros::NodeHandle n;
 
+  client = n.serviceClient<add_markers::AddMarker>("add_marker");
   MoveBaseClient ac("move_base", true);
 
   while (!ac.waitForServer(ros::Duration(5.0)))
@@ -68,14 +97,39 @@ int main(int argc, char** argv)
   mbg.target_pose.header.frame_id = "map";
 
   std::vector<Goal> goals;
-  goals.push_back(Goal("pick-up", 2.0, 2.0, M_PI/4));
-  goals.push_back(Goal("drop-off", -2.0, -2.0, 5*M_PI/4));
+  int id = 0;
+  goals.push_back(Goal("pick-up", id, 2.0, 2.0, M_PI/4, true));
+  goals.push_back(Goal("drop-off", id, -2.0, -2.0, 5*M_PI/4, false));
 
   for (auto& goal : goals)
   {
     if (completeGoal(ac, mbg, goal))
     {
       ros::Duration(5.0).sleep();
+
+      // Update marker
+      add_markers::AddMarker srv;
+      srv.request.id = goal.id;
+      srv.request.x = goal.x;
+      srv.request.y = goal.y;
+      srv.request.yaw = goal.yaw;
+
+      if (goal.pickup)
+      {
+        srv.request.action = false; // delete marker
+      }
+      else
+      {
+        srv.request.action = true; // add marker
+      }
+      if (client.call(srv))
+      {
+        ROS_INFO("Updated marker.");
+      }
+      else
+      {
+        ROS_INFO("Failed to update marker.");
+      }
     }
     else
     {

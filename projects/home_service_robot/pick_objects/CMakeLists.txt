@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES pick_objects
-#  CATKIN_DEPENDS actionlib move_base_msgs roscpp
+#  CATKIN_DEPENDS actionlib move_base_msgs roscpp add_markers
 #  DEPENDS system_lib
 )
 
