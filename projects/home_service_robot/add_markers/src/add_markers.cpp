@@ -7,6 +7,9 @@
 
 ros::Publisher publisher;
 
+/*
+ * Adds/modifies or deletes marker.
+ */
 bool addMarker(add_markers::AddMarker::Request &req,
     add_markers::AddMarker::Response &res)
 {
@@ -35,9 +38,9 @@ bool addMarker(add_markers::AddMarker::Request &req,
   marker.pose.position.z = 0.0;
   marker.pose.orientation = tf::createQuaternionMsgFromYaw(req.yaw);
 
-  marker.scale.x = 1.0;
-  marker.scale.y = 1.0;
-  marker.scale.z = 1.0;
+  marker.scale.x = 0.25;
+  marker.scale.y = 0.25;
+  marker.scale.z = 0.25;
 
   marker.color.r = 0.0f;
   marker.color.g = 1.0f;
@@ -59,6 +62,8 @@ int main(int argc, char** argv)
 
   publisher = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
   ros::ServiceServer service = n.advertiseService("add_marker", addMarker);
+
+  ROS_INFO("Ready to add markers.");
 
   ros::spin();
 

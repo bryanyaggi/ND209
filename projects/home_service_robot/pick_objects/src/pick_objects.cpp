@@ -10,12 +10,15 @@
 
 ros::ServiceClient client;
 
+/*
+ * Class for storing navigation goal
+ */
 class Goal
 {
   public:
-    std::string name;
-    int id;
-    bool pickup;
+    std::string name; // for messages
+    int id; // marker ID
+    bool pickup; // represents pick-up location
     double x;
     double y;
     double yaw;
@@ -54,6 +57,10 @@ class Goal
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
+/*
+ * Completes navigation goal.
+ * Sends MoveBaseGoal message and waits for completion.
+ */
 bool completeGoal(MoveBaseClient &ac, move_base_msgs::MoveBaseGoal &mbg, Goal goal)
 {
   mbg.target_pose.header.stamp = ros::Time::now();
@@ -98,8 +105,11 @@ int main(int argc, char** argv)
 
   std::vector<Goal> goals;
   int id = 0;
-  goals.push_back(Goal("pick-up", id, 2.0, 2.0, M_PI/4, true));
-  goals.push_back(Goal("drop-off", id, -2.0, -2.0, 5*M_PI/4, false));
+  goals.push_back(Goal("pick-up 1", id, 2.0, 2.0, M_PI/4, true));
+  goals.push_back(Goal("drop-off 1", id, -5.0, -5.0, 5*M_PI/4, false));
+  id++;
+  goals.push_back(Goal("pick-up 2", id, -5.0, 2.0, M_PI/2, true));
+  goals.push_back(Goal("drop-off 2", id, -5.0, -5.0, 3*M_PI/2, false));
 
   for (auto& goal : goals)
   {
@@ -113,7 +123,6 @@ int main(int argc, char** argv)
       srv.request.x = goal.x;
       srv.request.y = goal.y;
       srv.request.yaw = goal.yaw;
-
       if (goal.pickup)
       {
         srv.request.action = false; // delete marker
