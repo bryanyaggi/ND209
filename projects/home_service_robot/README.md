@@ -35,4 +35,4 @@ Initially, `test_slam.sh` is used to create a map of the world. `turtlebot_gazeb
 - Run `./home_service.sh`.
   - Gazebo, RViz, and several emulated terminals will appear, and the demo will commence.
 
-![](https://github.com/bryanyaggi/ND209/tree/master/projects/home_service_robot/images/ss.png)
+![](images/ss.png)
